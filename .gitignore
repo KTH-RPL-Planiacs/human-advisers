@@ -1,3 +1,6 @@
+# custom
+prism_bridge/adv.tra
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -127,3 +130,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# IDE
+.idea/*
+
+# JAVA Stuff
+*/*.class
