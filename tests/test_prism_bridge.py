@@ -8,7 +8,6 @@ class PrismHandlerTest(unittest.TestCase):
     def setUp(self):
         try:
             self.prism_handler = PrismBridge()
-            print("Successfully connected to PRISM java gateway!")
         except Py4JNetworkError as err:
             print('Py4JNetworkError:', err)
             print("It is most likely that you forgot to start the PRISM java gateway. "
