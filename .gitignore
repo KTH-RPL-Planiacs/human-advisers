@@ -1,5 +1,7 @@
 # custom
 prism_bridge/adv.tra
+generated/*
+tests/generated/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

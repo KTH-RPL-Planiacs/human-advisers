@@ -15,7 +15,7 @@ def create_game(mdp, dfa):
     if dfa_init in dfa.graph['acc']:
         synth.graph['acc'].append(synth_init)
 
-    synth.add_node(synth_init, player=1, ap=mdp.nodes[mdp_init]['ap'][0])
+    synth.add_node(synth_init, player=1, ap=mdp.nodes[mdp_init]['ap'])
     synth.graph['init'] = synth_init
 
     # dfa and mdp atomic propositions
@@ -61,7 +61,7 @@ def create_game(mdp, dfa):
 
                 for mdp_succ in mdp.successors(mdp_from):
                     # generate configuration guard for chosen option and potential next mdp state
-                    mdp_obs = mdp.nodes[mdp_succ]['ap'][0]
+                    mdp_obs = mdp.nodes[mdp_succ]['ap']
                     config = mdp_obs + opt_guard
 
                     for dfa_succ in dfa.successors(dfa_from):
@@ -91,7 +91,7 @@ def create_game(mdp, dfa):
                 dfa_succ = synth_succ[1]
 
                 if not synth.has_node(synth_succ):
-                    synth.add_node(synth_succ, player=1, ap=mdp.nodes[mdp_succ]['ap'][0])
+                    synth.add_node(synth_succ, player=1, ap=mdp.nodes[mdp_succ]['ap'])
                     if dfa_succ in dfa.graph['acc']:
                         synth.graph['acc'].append(synth_succ)
                     que.put(synth_succ)  # put new states in queue

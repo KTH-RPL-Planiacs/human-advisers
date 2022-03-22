@@ -1,11 +1,12 @@
 import networkx as nx
+from models.validation import is_valid
 
 
 def corridor_mdp(r_id, init_state):
     m = nx.DiGraph()
 
     # graph information
-    m.graph['name'] = 'robot' + r_id
+    m.graph['name'] = 'corridor' + r_id
     m.graph['init'] = init_state
     # order sensitive
     m.graph['ap'] = ['end_top' + r_id, 'corr_top' + r_id, 'crit' + r_id, 'corr_bot' + r_id, 'end_bot' + r_id]
@@ -70,4 +71,6 @@ def corridor_mdp(r_id, init_state):
 
     m.add_edge('end_bot_s', 'end_bot', prob=1.0)
     m.add_edge('end_bot_u', 'corridor_bot', prob=1.0)
+
+    assert is_valid(m), "MDP IS INVALID"
     return m

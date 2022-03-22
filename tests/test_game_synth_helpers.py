@@ -2,7 +2,7 @@ import unittest
 from game_synth.helpers import powerset, group_and_flip, create_guard, sog_fits_to_guard
 
 
-class PrismHandlerTest(unittest.TestCase):
+class GameSynthHelpersTest(unittest.TestCase):
 
     def test_powerset(self):
         result = list(powerset([1, 2, 3]))
