@@ -2,7 +2,7 @@ import unittest
 
 import networkx as nx
 
-from game_synth.helpers import powerset, group_and_flip, create_guard, sog_fits_to_guard, remove_edges
+from game_synth.helpers import powerset, group_and_flip, create_guard, sog_fits_to_guard, remove_edges, reduce_set_of_guards
 
 
 class GameSynthHelpersTest(unittest.TestCase):
@@ -41,4 +41,20 @@ class GameSynthHelpersTest(unittest.TestCase):
         edges_to_remove = [(1, 2)]
         remove_edges(game, edges_to_remove)
         self.assertEqual(len(game.edges), 1)
+
+    def test_reduce_sog(self):
+        sog = {"01", "10", "11"}
+        result = reduce_set_of_guards(sog)
+        expected = {'1X', 'X1'}
+        self.assertEqual(result, expected)
+
+        sog = {"01", "10"}
+        result = reduce_set_of_guards(sog)
+        expected = {'01', '10'}
+        self.assertEqual(result, expected)
+
+        sog = {"01", "10", "11", "00"}
+        result = reduce_set_of_guards(sog)
+        expected = {'XX'}
+        self.assertEqual(result, expected)
 

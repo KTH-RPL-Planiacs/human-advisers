@@ -1,6 +1,6 @@
 import networkx as nx
 import queue
-from game_synth.helpers import powerset, create_guard, group_and_flip, sog_fits_to_guard
+from game_synth.helpers import powerset, create_guard, group_and_flip, sog_fits_to_guard, reduce_set_of_guards
 
 
 def create_game(mdp, dfa):
@@ -75,14 +75,13 @@ def create_game(mdp, dfa):
             grouped_results = group_and_flip(results)
 
             for res, opts in grouped_results.items():
-                # TODO: simplify guards for each grouped option
-
+                reduced_opts = reduce_set_of_guards(opts)
                 # create a probabilistic state, add it and connect it
-                synth_succ = (mdp_from, dfa_from, frozenset(opts))
+                synth_succ = (mdp_from, dfa_from, frozenset(reduced_opts))
                 if not synth.has_node(synth_succ):
                     synth.add_node(synth_succ, player=0, res=res)
                     que.put(synth_succ)  # put new states in queue
-                synth.add_edge(synth_from, synth_succ, guards=opts)
+                synth.add_edge(synth_from, synth_succ, guards=list(reduced_opts))
 
         # player 3 states, probabilistic function moves and dfa moves accordingly
         elif synth.nodes[synth_from]['player'] == 0:
