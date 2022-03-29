@@ -14,7 +14,8 @@ if __name__ == "__main__":
         print("Successfully connected to PRISM java gateway!")
 
         mdp = corridor_mdp("_r", "end_top")
-        spec = "F(end_top_r && end_top_h) && G(!(crit_r && crit_h))"
+        human_model = corridor_mdp("_h", "end_bot")
+        spec = "F(end_top_r) && G(!(crit_r && crit_h))"
         dfa = to_nxgraph(to_mona(spec))
         synth = create_game(mdp, dfa)
         safety_edges = minimal_safety_edges(synth, prism_handler)
