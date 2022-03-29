@@ -65,3 +65,8 @@ def prune_unreachable_states(game):
         # remove unreachable accepting state from accepting state list
         if urn in game.graph['acc']:
             game.graph['acc'].remove(urn)
+
+
+def remove_edges(game, edges):
+    for edge in edges:
+        game.remove_edge(*edge)

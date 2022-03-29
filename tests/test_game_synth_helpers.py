@@ -1,5 +1,8 @@
 import unittest
-from game_synth.helpers import powerset, group_and_flip, create_guard, sog_fits_to_guard
+
+import networkx as nx
+
+from game_synth.helpers import powerset, group_and_flip, create_guard, sog_fits_to_guard, remove_edges
 
 
 class GameSynthHelpersTest(unittest.TestCase):
@@ -29,3 +32,13 @@ class GameSynthHelpersTest(unittest.TestCase):
         result = sog_fits_to_guard(guard, sog, guard_ap, sog_ap)
         expected = ["XXX", "011"]
         self.assertEqual(result, expected)
+
+    def test_remove_edges(self):
+        game = nx.DiGraph()
+        game.add_edge(1, 2)
+        game.add_edge(2, 3)
+        self.assertEqual(len(game.edges), 2)
+        edges_to_remove = [(1, 2)]
+        remove_edges(game, edges_to_remove)
+        self.assertEqual(len(game.edges), 1)
+
