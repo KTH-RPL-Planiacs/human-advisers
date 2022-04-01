@@ -72,6 +72,27 @@ def remove_edges(game, edges):
         game.remove_edge(*edge)
 
 
+def remove_other_edges(game, edges):
+    """
+    in each state with an edge in edges, remove all other edges for that state.
+    if edges are fairness edges (assumed usage of this fn), then this "forces" p2
+    to pick fair options
+    :param game:
+    :param edges:
+    :return:
+    """
+    if not edges:
+        return
+
+    for edge in edges:
+        node_from = edge[0]
+        node_to = edge[1]
+        for succ in game.successors(node_from):
+            hyp_edge = (node_from, succ)
+            if hyp_edge not in edges:
+                game.remove_edge(hyp_edge)
+
+
 def reduce_set_of_guards(sog):
     # first, resolve all generalizations
     new_sog = set()

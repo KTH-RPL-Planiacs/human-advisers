@@ -1,0 +1,29 @@
+smg
+
+player p1
+    [p1_0_0],[p1_0_1],[p1_0_2],[p1_3_3]
+endplayer
+
+player p2
+    [p2_1_3],[p2_2_3]
+endplayer
+
+module reward_test
+    x : [0..3] init 0;
+    t : [0..9] init 0;
+    [p1_0_0] x=0 & t<10 -> (x'=0)&(t'=t+1);
+    [p1_0_1] x=0 & t<10 -> (x'=1)&(t'=t+1);
+    [p1_0_2] x=0 & t<10 -> (x'=2)&(t'=t+1);
+    [p1_3_3] x=3 & t<10 -> (x'=3)&(t'=t+1);
+    [p2_1_3] x=1 & t<10 -> (x'=3)&(t'=t+1);
+    [p2_2_3] x=2 & t<10 -> (x'=3)&(t'=t+1);
+
+endmodule
+
+label "acc" = x=3;
+
+rewards
+    [p1_0_0] true : 1;
+    [p1_0_1] true : 2;
+    [p1_0_2] true : 1;
+endrewards

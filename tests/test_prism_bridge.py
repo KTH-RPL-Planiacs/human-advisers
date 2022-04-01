@@ -34,9 +34,17 @@ class PrismHandlerTest(unittest.TestCase):
 
     def test_strategy_reward(self):
         self.prism_handler.load_model_file("../tests/resources/reward-game.prism")
-        result = self.prism_handler.synthesize_strategy("<<p1>> Rmax=? [ F0 \"acc\" ]", test=True)
+        result = self.prism_handler.synthesize_strategy("<<p1>> Rmin=? [ F \"acc\" ]", test=True)
         self.assertEqual(result["0"], "p1_0_2")
         self.assertEqual(result["3"], "-")
+
+    def test_strategy_reward_bounded(self):
+        self.prism_handler.load_model_file("../tests/resources/bounded-game.prism")
+        result = self.prism_handler.synthesize_strategy("<<p1>> Rmin=? [ F \"acc\" ]", test=True)
+        self.assertEqual(len(result), 40)
+        self.assertEqual(result["0"], "p1_0_2")
+        self.assertEqual(result["10"], "null")
+        self.assertEqual(result["30"], "null")
 
  
 if __name__ == '__main__':

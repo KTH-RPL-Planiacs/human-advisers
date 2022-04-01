@@ -12,7 +12,7 @@ def create_game(mdp_r, mdp_h, dfa):
     dfa_init = dfa.graph['init']
     robot_init = mdp_r.graph['init']
     human_init = mdp_h.graph['init']
-    synth_init = (robot_init, human_init, dfa_init)
+    synth_init = (robot_init, human_init, dfa_init, 1)
 
     if dfa_init in dfa.graph['acc']:
         synth.graph['acc'].append(synth_init)
@@ -41,17 +41,18 @@ def create_game(mdp_r, mdp_h, dfa):
         mdp_r_from = synth_from[0]
         mdp_h_from = synth_from[1]
         dfa_from = synth_from[2]
+        player = synth_from[3]
 
         assert synth.nodes[synth_from]['player'] in [1, 2, 0], "Each state need to belong to player 1,2 or 0!"
-
+        assert synth.nodes[synth_from]['player'] == player
         # player 1 states, robot moves
-        if synth.nodes[synth_from]['player'] == 1:
+        if player == 1:
             # for all possible robot moves
             for robot_succ in mdp_r.successors(mdp_r_from):
                 # this should be a probabilistic state in the robot mdp
                 assert mdp_r.nodes[robot_succ]['player'] == 0
                 # add the new state to the synthesis product and connect it
-                synth_succ = (robot_succ, mdp_h_from, dfa_from)
+                synth_succ = (robot_succ, mdp_h_from, dfa_from, 0)
                 if not synth.has_node(synth_succ):
                     synth.add_node(synth_succ, player=0)
                     que.put(synth_succ)  # put new states in queue
@@ -59,13 +60,13 @@ def create_game(mdp_r, mdp_h, dfa):
                 synth.add_edge(synth_from, synth_succ, act=action_lbl)
 
         # player 2 states, human moves
-        if synth.nodes[synth_from]['player'] == 2:
+        if player == 2:
             # for all possible human moves
             for human_succ in mdp_h.successors(mdp_h_from):
                 # this should be a probabilistic state in the human mdp
                 assert mdp_h.nodes[human_succ]['player'] == 0
                 # add the new state to the synthesis product and connect it
-                synth_succ = (mdp_r_from, human_succ, dfa_from)
+                synth_succ = (mdp_r_from, human_succ, dfa_from, 0)
                 if not synth.has_node(synth_succ):
                     synth.add_node(synth_succ, player=0)
                     que.put(synth_succ)  # put new states in queue
@@ -73,7 +74,7 @@ def create_game(mdp_r, mdp_h, dfa):
                 synth.add_edge(synth_from, synth_succ, act=action_lbl)
 
         # probabilistic states
-        if synth.nodes[synth_from]['player'] == 0:
+        if player == 0:
             assert sum(1 for _ in synth.predecessors(synth_from)) == 1
             pred = next(synth.predecessors(synth_from))
 
@@ -83,7 +84,7 @@ def create_game(mdp_r, mdp_h, dfa):
                     # this should be a player1 state in the robot mdp
                     assert mdp_r.nodes[robot_succ]['player'] == 1
                     # add the new state to the synthesis product and connect it
-                    synth_succ = (robot_succ, mdp_h_from, dfa_from)
+                    synth_succ = (robot_succ, mdp_h_from, dfa_from, 2)
                     if not synth.has_node(synth_succ):
                         synth.add_node(synth_succ, player=2)
                         que.put(synth_succ)  # put new states in queue
@@ -107,7 +108,7 @@ def create_game(mdp_r, mdp_h, dfa):
                             continue
 
                         # add the new state to the synthesis product and connect it
-                        synth_succ = (mdp_r_from, human_succ, dfa_succ)
+                        synth_succ = (mdp_r_from, human_succ, dfa_succ, 1)
                         if not synth.has_node(synth_succ):
                             synth.add_node(synth_succ, player=1, ap=cur_ap)
                             que.put(synth_succ)  # put new states in queue

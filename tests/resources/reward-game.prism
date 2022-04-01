@@ -21,6 +21,6 @@ endmodule
 label "acc" = x=3;
 
 rewards
-    [p1_0_1] true : 1;
-    [p1_0_2] true : 2;
+    [p1_0_1] true : 2;
+    [p1_0_2] true : 1;
 endrewards
