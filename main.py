@@ -36,7 +36,7 @@ if __name__ == "__main__":
         print("FAIRNESS ASSUM", fairness_edges)
 
         strategy = get_min_strategy_bounded(synth, prism_handler)
-        # print("STRATEGY", *strategy.items(), sep="\n")
+        print("STRATEGY", *strategy.items(), sep="\n")
 
     except Py4JNetworkError as err:
         print('Py4JNetworkError:', err)
