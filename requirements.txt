@@ -1,3 +1,4 @@
 py4j
 ltlf2dfa
 networkx
+pygame
