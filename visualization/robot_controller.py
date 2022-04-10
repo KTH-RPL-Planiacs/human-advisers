@@ -10,6 +10,14 @@ class RobotController(ABC):
         pass
 
     @abstractmethod
+    def get_safety_adv(self):
+        pass
+
+    @abstractmethod
+    def get_fairness_adv(self):
+        pass
+
+    @abstractmethod
     def set_human_move(self, move):
         pass
 
@@ -30,7 +38,13 @@ class DummyController(RobotController):
         pass
 
     def is_satisfied(self):
-        return False
+        return True
 
     def is_violated(self):
         return False
+
+    def get_safety_adv(self):
+        return {Move.UP, Move.DOWN}
+
+    def get_fairness_adv(self):
+        return {Move.LEFT}

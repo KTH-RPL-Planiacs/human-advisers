@@ -13,6 +13,9 @@ class RectSprite(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (int(width), int(height)))
         self.rect = self.image.get_rect()
 
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
 
 class InteractiveViz:
 
@@ -41,7 +44,8 @@ class InteractiveViz:
         pygame.font.init()
 
         # set the width and height of the screen (width , height)
-        screen_x = grid_size_x + 300    # for status panel
+        self.PANEL_WIDTH = 300
+        screen_x = grid_size_x + self.PANEL_WIDTH    # for status panel
         screen_y = grid_size_y
         self.size = (screen_x, screen_y)
         self.screen = pygame.display.set_mode(self.size)
@@ -50,16 +54,52 @@ class InteractiveViz:
         pygame.display.set_caption("Interactive Visualization")
 
         # sprites
-        self.sprites_list = pygame.sprite.Group()
+        # actors
+        self.actor_sprites = pygame.sprite.Group()
         scaling_factor = 0.8
         self.robot_sprite = RectSprite('assets/robot.png', self.WIDTH * scaling_factor, self.HEIGHT * scaling_factor)
         self.human_sprite = RectSprite('assets/person.png', self.WIDTH * scaling_factor, self.HEIGHT * scaling_factor)
-        self.sprites_list.add(self.robot_sprite)
-        self.sprites_list.add(self.human_sprite)
+        self.actor_sprites.add(self.robot_sprite)
+        self.actor_sprites.add(self.human_sprite)
+        # arrows
+        self.ARROW_SIZE = 100
+        self.white_arrows = {
+            Move.UP: RectSprite('assets/up.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.LEFT: RectSprite('assets/left.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.RIGHT: RectSprite('assets/right.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.DOWN: RectSprite('assets/down.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.IDLE: RectSprite('assets/idle.png', self.ARROW_SIZE, self.ARROW_SIZE),
+        }
+        self.init_arrow_positions(self.white_arrows)
+        self.red_arrows = {
+            Move.UP: RectSprite('assets/up_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.LEFT: RectSprite('assets/left_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.RIGHT: RectSprite('assets/right_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.DOWN: RectSprite('assets/down_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.IDLE: RectSprite('assets/idle_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
+        }
+        self.init_arrow_positions(self.red_arrows)
+        self.green_arrows = {
+            Move.UP: RectSprite('assets/up_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.LEFT: RectSprite('assets/left_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.RIGHT: RectSprite('assets/right_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.DOWN: RectSprite('assets/down_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.IDLE: RectSprite('assets/idle_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
+        }
+        self.init_arrow_positions(self.green_arrows)
 
         # loop variables
         self.running = True
         self.paused = False
+
+    def init_arrow_positions(self, arrows):
+        x_panel_center = self.GRID_SIZE[0] + self.PANEL_WIDTH / 2.
+        y_start = 100. + self.ARROW_SIZE / 2.
+        arrows[Move.UP].rect.center = (x_panel_center, y_start)
+        arrows[Move.IDLE].rect.center = (x_panel_center, y_start + self.ARROW_SIZE)
+        arrows[Move.LEFT].rect.center = (x_panel_center - self.ARROW_SIZE, y_start + self.ARROW_SIZE)
+        arrows[Move.RIGHT].rect.center = (x_panel_center + self.ARROW_SIZE, y_start + self.ARROW_SIZE)
+        arrows[Move.DOWN].rect.center = (x_panel_center, y_start + 2. * self.ARROW_SIZE)
 
     def init_human_pos(self, x, y):
         self.human_pos = (x, y)
@@ -71,18 +111,45 @@ class InteractiveViz:
 
     def render(self):
         self.screen.fill(Color.BLACK)
+        self.render_grid()
+        self.render_actors()
+        self.render_status_panel()
 
-        # draw the grid
-        for row in range(len(self.grid)):
-            for col in range(len(self.grid[0])):
-                cell_color = Color.BLACK
-                if self.grid[row][col] == 0:
-                    cell_color = Color.WHITE
+        # flip the renderer buffer
+        pygame.display.flip()
 
-                cell_x = (self.MARGIN + self.WIDTH) * col + self.MARGIN / 2.
-                cell_y = (self.MARGIN + self.HEIGHT) * row + self.MARGIN / 2.
-                pygame.draw.rect(self.screen, cell_color, [cell_x, cell_y, self.WIDTH, self.HEIGHT])
+    def render_status_panel(self):
+        # status panel
+        self.render_text("SPACE to pause/unpause", color=Color.WHITE, x=self.GRID_SIZE[0])
+        self.render_text("WASD to move", color=Color.WHITE, x=self.GRID_SIZE[0], y=20)
+        if self.paused:
+            self.render_text("PAUSED", color=Color.WHITE, x=self.GRID_SIZE[0], y=40)
 
+        satisfied_str = "satisfied: "
+        if self.robot_controller.is_satisfied():
+            satisfied_str += "true"
+        else:
+            satisfied_str += "false"
+        self.render_text(satisfied_str, color=Color.WHITE, x=self.GRID_SIZE[0], y=60)
+
+        violated_str = "safety violated: "
+        if self.robot_controller.is_violated():
+            violated_str += "true"
+        else:
+            violated_str += "false"
+        self.render_text(violated_str, color=Color.WHITE, x=self.GRID_SIZE[0], y=80)
+
+        # adviser arrows
+        for arrow_sprite in self.white_arrows.values():
+            arrow_sprite.draw(self.screen)
+
+        for saf_adv in self.robot_controller.get_safety_adv():
+            self.red_arrows[saf_adv].draw(self.screen)
+
+        for fair_adv in self.robot_controller.get_fairness_adv():
+            self.green_arrows[fair_adv].draw(self.screen)
+
+    def render_actors(self):
         # interpolation
         t = self.frame_count / self.SPEED
         t = t * t * (3 - 2 * t)
@@ -108,30 +175,18 @@ class InteractiveViz:
         self.human_sprite.rect.y = int(h_y * (1 - t) + h_ny * t)
 
         # draw the actors
-        self.sprites_list.draw(self.screen)
+        self.actor_sprites.draw(self.screen)
 
-        # status panel
-        self.render_text("SPACE to pause/unpause", color=Color.WHITE, x=self.GRID_SIZE[0])
-        self.render_text("WASD to move", color=Color.WHITE, x=self.GRID_SIZE[0], y=20)
-        if self.paused:
-            self.render_text("PAUSED", color=Color.WHITE, x=self.GRID_SIZE[0], y=40)
+    def render_grid(self):
+        for row in range(len(self.grid)):
+            for col in range(len(self.grid[0])):
+                cell_color = Color.BLACK
+                if self.grid[row][col] == 0:
+                    cell_color = Color.WHITE
 
-        satisfied_str = "satisfied: "
-        if self.robot_controller.is_satisfied():
-            satisfied_str += "true"
-        else:
-            satisfied_str += "false"
-        self.render_text(satisfied_str, color=Color.WHITE, x=self.GRID_SIZE[0], y=60)
-
-        violated_str = "safety violated: "
-        if self.robot_controller.is_violated():
-            violated_str += "true"
-        else:
-            violated_str += "false"
-        self.render_text(violated_str, color=Color.WHITE, x=self.GRID_SIZE[0], y=80)
-
-        # flip the renderer buffer
-        pygame.display.flip()
+                cell_x = (self.MARGIN + self.WIDTH) * col + self.MARGIN / 2.
+                cell_y = (self.MARGIN + self.HEIGHT) * row + self.MARGIN / 2.
+                pygame.draw.rect(self.screen, cell_color, [cell_x, cell_y, self.WIDTH, self.HEIGHT])
 
     def render_text(self, text, color=Color.BLACK, x=0, y=0):
         text_surface = self.font.render(text, True, color)
