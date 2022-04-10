@@ -224,13 +224,13 @@ class InteractiveViz:
             human_move = Move.RIGHT
 
         if human_move == Move.UP:
-            ny = max(0, ny - 1)
+            ny -= 1
         if human_move == Move.DOWN:
-            ny = min(len(self.grid) - 1, ny + 1)
+            ny += 1
         if human_move == Move.LEFT:
-            nx = max(0, nx - 1)
+            nx -= 1
         if human_move == Move.RIGHT:
-            nx = min(len(self.grid[0]) - 1, nx + 1)
+            nx += 1
 
         self.next_human_pos = (nx, ny)
 
@@ -241,13 +241,13 @@ class InteractiveViz:
 
         robot_move = self.robot_controller.get_next_move()
         if robot_move == Move.UP:
-            ny = ny - 1
+            ny -= 1
         if robot_move == Move.DOWN:
-            ny = ny + 1
+            ny += 1
         if robot_move == Move.LEFT:
-            nx = nx - 1
+            nx -= 1
         if robot_move == Move.RIGHT:
-            nx = nx + 1
+            nx += 1
 
         self.next_robot_pos = (nx, ny)
 
