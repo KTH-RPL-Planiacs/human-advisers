@@ -26,6 +26,7 @@ def corridor_mdp(r_id, init_state):
     m.add_node('corridor_top_u', player=0)
     m.add_node('corridor_top_d', player=0)
 
+    m.add_node('crit_s', player=0)
     m.add_node('crit_u', player=0)
     m.add_node('crit_d', player=0)
 
@@ -44,6 +45,7 @@ def corridor_mdp(r_id, init_state):
     m.add_edge('corridor_top', 'corridor_top_u', act='up')
     m.add_edge('corridor_top', 'corridor_top_d', act='down')
 
+    m.add_edge('crit', 'crit_s', act='stay')
     m.add_edge('crit', 'crit_u', act='up')
     m.add_edge('crit', 'crit_d', act='down')
 
@@ -54,23 +56,32 @@ def corridor_mdp(r_id, init_state):
     m.add_edge('end_bot', 'end_bot_s', act='stay')
     m.add_edge('end_bot', 'end_bot_u', act='up')
 
-    # probabilistic edges - deterministic here
+    # probabilistic edges
     m.add_edge('end_top_s', 'end_top', prob=1.0)
-    m.add_edge('end_top_d', 'corridor_top', prob=1.0)
+    m.add_edge('end_top_d', 'corridor_top', prob=0.9)
+    m.add_edge('end_top_d', 'end_top', prob=0.1)
 
     m.add_edge('corridor_top_s', 'corridor_top', prob=1.0)
-    m.add_edge('corridor_top_u', 'end_top', prob=1.0)
-    m.add_edge('corridor_top_d', 'crit', prob=1.0)
+    m.add_edge('corridor_top_u', 'end_top', prob=0.9)
+    m.add_edge('corridor_top_u', 'corridor_top', prob=0.1)
+    m.add_edge('corridor_top_d', 'crit', prob=0.9)
+    m.add_edge('corridor_top_d', 'corridor_top', prob=0.1)
 
-    m.add_edge('crit_u', 'corridor_top', prob=1.0)
-    m.add_edge('crit_d', 'corridor_bot', prob=1.0)
+    m.add_edge('crit_s', 'crit', prob=1.0)
+    m.add_edge('crit_u', 'corridor_top', prob=0.9)
+    m.add_edge('crit_u', 'crit', prob=0.1)
+    m.add_edge('crit_d', 'corridor_bot', prob=0.9)
+    m.add_edge('crit_d', 'crit', prob=0.1)
 
     m.add_edge('corridor_bot_s', 'corridor_bot', prob=1.0)
-    m.add_edge('corridor_bot_u', 'crit', prob=1.0)
-    m.add_edge('corridor_bot_d', 'end_bot', prob=1.0)
+    m.add_edge('corridor_bot_u', 'crit', prob=0.9)
+    m.add_edge('corridor_bot_u', 'corridor_bot', prob=0.1)
+    m.add_edge('corridor_bot_d', 'end_bot', prob=0.9)
+    m.add_edge('corridor_bot_u', 'corridor_bot', prob=0.1)
 
     m.add_edge('end_bot_s', 'end_bot', prob=1.0)
-    m.add_edge('end_bot_u', 'corridor_bot', prob=1.0)
+    m.add_edge('end_bot_u', 'corridor_bot', prob=0.9)
+    m.add_edge('end_bot_u', 'end_bot', prob=0.1)
 
     assert is_valid(m), "MDP IS INVALID"
     return m
