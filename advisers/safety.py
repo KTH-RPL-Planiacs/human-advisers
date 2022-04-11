@@ -2,6 +2,16 @@ from prism_bridge.prism_io import write_prism_model
 
 
 def minimal_safety_edges(synth, prism_handler):
+    # check if safety is necessary
+    win_prop = '<< p1 >> Pmax=? [F \"accept\"]'
+    # PRISM translations
+    prism_model, state_ids = write_prism_model(synth, "safety")
+    prism_handler.load_model_file(prism_model)
+    result = prism_handler.check_property(win_prop)
+
+    if result[0] >= 0.999:
+        return []
+
     safass_prop = '<< p1,p2 >> Pmax=? [F \"accept\"]'
 
     # PRISM translations

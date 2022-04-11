@@ -2,7 +2,8 @@ import networkx as nx
 
 
 def is_valid(mdp):
-    return is_probabilites_valid(mdp)
+    is_probabilites_valid(mdp)
+    return True
 
 
 def is_probabilites_valid(mdp):
@@ -14,8 +15,6 @@ def is_probabilites_valid(mdp):
         for succ in mdp.successors(node):
             total_prob += mdp.edges[node, succ]["prob"]
 
-        if abs(total_prob - 1.0) > 0.01:
-            return False
+        assert abs(total_prob - 1.0) < 0.01
 
-    return True
 

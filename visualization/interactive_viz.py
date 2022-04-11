@@ -57,34 +57,34 @@ class InteractiveViz:
         # actors
         self.actor_sprites = pygame.sprite.Group()
         scaling_factor = 0.8
-        self.robot_sprite = RectSprite('assets/robot.png', self.WIDTH * scaling_factor, self.HEIGHT * scaling_factor)
-        self.human_sprite = RectSprite('assets/person.png', self.WIDTH * scaling_factor, self.HEIGHT * scaling_factor)
+        self.robot_sprite = RectSprite('visualization/assets/robot.png', self.WIDTH * scaling_factor, self.HEIGHT * scaling_factor)
+        self.human_sprite = RectSprite('visualization/assets/person.png', self.WIDTH * scaling_factor, self.HEIGHT * scaling_factor)
         self.actor_sprites.add(self.robot_sprite)
         self.actor_sprites.add(self.human_sprite)
         # arrows
         self.ARROW_SIZE = 100
         self.white_arrows = {
-            Move.UP: RectSprite('assets/up.png', self.ARROW_SIZE, self.ARROW_SIZE),
-            Move.LEFT: RectSprite('assets/left.png', self.ARROW_SIZE, self.ARROW_SIZE),
-            Move.RIGHT: RectSprite('assets/right.png', self.ARROW_SIZE, self.ARROW_SIZE),
-            Move.DOWN: RectSprite('assets/down.png', self.ARROW_SIZE, self.ARROW_SIZE),
-            Move.IDLE: RectSprite('assets/idle.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.UP: RectSprite('visualization/assets/up.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.LEFT: RectSprite('visualization/assets/left.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.RIGHT: RectSprite('visualization/assets/right.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.DOWN: RectSprite('visualization/assets/down.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.IDLE: RectSprite('visualization/assets/idle.png', self.ARROW_SIZE, self.ARROW_SIZE),
         }
         self.init_arrow_positions(self.white_arrows)
         self.red_arrows = {
-            Move.UP: RectSprite('assets/up_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
-            Move.LEFT: RectSprite('assets/left_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
-            Move.RIGHT: RectSprite('assets/right_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
-            Move.DOWN: RectSprite('assets/down_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
-            Move.IDLE: RectSprite('assets/idle_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.UP: RectSprite('visualization/assets/up_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.LEFT: RectSprite('visualization/assets/left_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.RIGHT: RectSprite('visualization/assets/right_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.DOWN: RectSprite('visualization/assets/down_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.IDLE: RectSprite('visualization/assets/idle_r.png', self.ARROW_SIZE, self.ARROW_SIZE),
         }
         self.init_arrow_positions(self.red_arrows)
         self.green_arrows = {
-            Move.UP: RectSprite('assets/up_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
-            Move.LEFT: RectSprite('assets/left_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
-            Move.RIGHT: RectSprite('assets/right_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
-            Move.DOWN: RectSprite('assets/down_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
-            Move.IDLE: RectSprite('assets/idle_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.UP: RectSprite('visualization/assets/up_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.LEFT: RectSprite('visualization/assets/left_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.RIGHT: RectSprite('visualization/assets/right_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.DOWN: RectSprite('visualization/assets/down_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
+            Move.IDLE: RectSprite('visualization/assets/idle_g.png', self.ARROW_SIZE, self.ARROW_SIZE),
         }
         self.init_arrow_positions(self.green_arrows)
 
@@ -252,6 +252,7 @@ class InteractiveViz:
         self.next_robot_pos = (nx, ny)
 
         # update robot controller
+        self.robot_controller.set_robot_move(robot_move)
         self.robot_controller.set_human_move(human_move)
 
     def handle_events(self):
@@ -280,10 +281,3 @@ class InteractiveViz:
                 self.run_step()
                 next_time = now_time + (1 / self.FPS)
 
-
-if __name__ == "__main__":
-    ex_grid = [[0 for col in range(10)] for row in range(10)]
-    viz = InteractiveViz(DummyController(), grid=ex_grid, grid_size_x=800, grid_size_y=800)
-    viz.init_human_pos(3, 4)
-    viz.init_robot_pos(7, 5)
-    viz.run_loop()
