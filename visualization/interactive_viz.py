@@ -212,17 +212,7 @@ class InteractiveViz:
         nx = self.human_pos[0]
         ny = self.human_pos[1]
 
-        human_move = Move.IDLE
-        pressed_keys = pygame.key.get_pressed()
-        if pressed_keys[pygame.constants.K_w]:
-            human_move = Move.UP
-        if pressed_keys[pygame.constants.K_s]:
-            human_move = Move.DOWN
-        if pressed_keys[pygame.constants.K_a]:
-            human_move = Move.LEFT
-        if pressed_keys[pygame.constants.K_d]:
-            human_move = Move.RIGHT
-
+        human_move = self.get_human_move()
         if human_move == Move.UP:
             ny -= 1
         if human_move == Move.DOWN:
@@ -254,6 +244,24 @@ class InteractiveViz:
         # update robot controller
         self.robot_controller.set_robot_move(robot_move)
         self.robot_controller.set_human_move(human_move)
+
+    def get_human_move(self):
+        human_move = Move.IDLE
+        pressed_keys = pygame.key.get_pressed()
+        if pressed_keys[pygame.constants.K_w]:
+            if self.human_pos[1] > 0:
+                human_move = Move.UP
+        if pressed_keys[pygame.constants.K_s]:
+            if self.human_pos[1] < len(self.grid)-1:
+                human_move = Move.DOWN
+        if pressed_keys[pygame.constants.K_a]:
+            if self.human_pos[0] > 0:
+                human_move = Move.LEFT
+        if pressed_keys[pygame.constants.K_d]:
+            if self.human_pos[0] < len(self.grid[0])-1:
+                human_move = Move.RIGHT
+
+        return human_move
 
     def handle_events(self):
         for event in pygame.event.get():

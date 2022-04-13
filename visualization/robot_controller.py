@@ -128,6 +128,7 @@ class AdviserRobotController(RobotController):
     def get_fairness_adv(self):
         return {}
 
+
 def game_action_from_move(move):
     if move == Move.UP:
         return "up"
