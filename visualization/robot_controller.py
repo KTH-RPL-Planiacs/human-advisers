@@ -86,26 +86,13 @@ class AdviserRobotController(RobotController):
 
     def set_human_move(self, move):
         assert self.game.nodes[self.current_state]["player"] == 2
-        act = game_action_from_move(move)
-        prob_state = None
-        for succ in self.game.successors(self.current_state):
-            if self.game.edges[self.current_state, succ]["act"] == act:
-                # check for safety violation
-                if (self.current_state, succ) in self.safety_adv:
-                    self.safety_violated = True
-                prob_state = succ
-                break
-        assert prob_state is not None, "invalid move"
-        # assume moving succeeds
-        for succ in self.game.successors(prob_state):
-            if succ != self.current_state or move == Move.IDLE:
-                self.current_state = succ
-                return
-
-        assert False,  "no successor state found"
+        self.current_state = self.next_state(move)
 
     def set_robot_move(self, move):
         assert self.game.nodes[self.current_state]["player"] == 1
+        self.current_state = self.next_state(move)
+
+    def next_state(self, move):
         act = game_action_from_move(move)
         prob_state = None
         for succ in self.game.successors(self.current_state):
@@ -116,8 +103,7 @@ class AdviserRobotController(RobotController):
         # assume moving succeeds
         for succ in self.game.successors(prob_state):
             if succ != self.current_state or move == Move.IDLE:
-                self.current_state = succ
-                return
+                return succ
 
         assert False, "no successor state found"
 
@@ -128,10 +114,22 @@ class AdviserRobotController(RobotController):
         return self.safety_violated
 
     def get_safety_adv(self):
-        return {}
+        assert self.game.nodes[self.current_state]["player"] == 1
+        adv = set()
+        next_state = self.next_state(self.get_next_move())
+        for succ in self.game.successors(next_state):
+            if (next_state, succ) in self.safety_adv:
+                adv.add(move_from_game_action(self.game.edges[next_state, succ]["act"]))
+        return adv
 
     def get_fairness_adv(self):
-        return {}
+        assert self.game.nodes[self.current_state]["player"] == 1
+        adv = set()
+        next_state = self.next_state(self.get_next_move())
+        for succ in self.game.successors(next_state):
+            if (next_state, succ) in self.fairness_adv:
+                adv.add(move_from_game_action(self.game.edges[next_state, succ]["act"]))
+        return adv
 
 
 def game_action_from_move(move):
@@ -145,3 +143,16 @@ def game_action_from_move(move):
         return "right"
     if move == Move.IDLE:
         return "stay"
+
+
+def move_from_game_action(act):
+    if act == "up":
+        return Move.UP
+    if act == "down":
+        return Move.DOWN
+    if act == "left":
+        return Move.LEFT
+    if act == "right":
+        return Move.RIGHT
+    if act == "stay":
+        return Move.IDLE
