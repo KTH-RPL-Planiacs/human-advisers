@@ -65,8 +65,10 @@ class AdviserRobotController(RobotController):
         self.current_state = game.graph["init"]
         self.safety_adv = safety
         self.fairness_adv = fairness
+        self.safety_violated = False
 
     def get_next_move(self):
+        assert self.game.nodes[self.current_state]["player"] == 1
         if self.current_state in self.strategy.keys():
             strat_move = self.strategy[self.current_state]
             if strat_move == "up":
@@ -88,6 +90,9 @@ class AdviserRobotController(RobotController):
         prob_state = None
         for succ in self.game.successors(self.current_state):
             if self.game.edges[self.current_state, succ]["act"] == act:
+                # check for safety violation
+                if (self.current_state, succ) in self.safety_adv:
+                    self.safety_violated = True
                 prob_state = succ
                 break
         assert prob_state is not None, "invalid move"
@@ -120,7 +125,7 @@ class AdviserRobotController(RobotController):
         return self.current_state in self.game.graph["acc"]
 
     def is_violated(self):
-        return False
+        return self.safety_violated
 
     def get_safety_adv(self):
         return {}

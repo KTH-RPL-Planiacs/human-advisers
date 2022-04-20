@@ -7,7 +7,7 @@ from ltlf2dfa_nx.mona2nx import to_nxgraph
 from ltlf2dfa_nx.parse_ltlf import to_mona
 from game_synth.modelled_human_game import create_game
 from game_synth.helpers import remove_edges
-from game_synth.strategy import has_winning_strategy, get_winning_strategy
+from game_synth.strategy import has_winning_strategy, get_winning_strategy, has_coop_strategy
 from advisers.safety import minimal_safety_edges
 from advisers.fairness import minimal_fairness_edges, construct_fair_game
 from visualization.interactive_viz import InteractiveViz
@@ -19,29 +19,37 @@ if __name__ == "__main__":
         print("Successfully connected to PRISM java gateway!")
 
         robot_model = corridor_mdp("_r", "end_bot")
-        human_model = det_corridor_mdp("_h", "end_top")
+        human_model = det_corridor_mdp("_h", "crit")
         spec = "F(end_top_r) && G(!(crit_r && crit_h))"
         dfa = to_nxgraph(to_mona(spec))
         # we keep the original game for later
         orig_synth = create_game(robot_model, human_model, dfa)
         synth = deepcopy(orig_synth)
 
-        print("Game has winning strategy before assumptions:", has_winning_strategy(synth, prism_handler))
+        assert has_coop_strategy(synth, prism_handler), "From the start, game is unwinnable no matter what"
+        print("Safety necessary:", not has_winning_strategy(synth, prism_handler))
         safety_edges = minimal_safety_edges(synth, prism_handler)
-        remove_edges(synth, safety_edges)           # necessary
+        print("SAFETY ASSUM", *safety_edges, sep="\n")
+        remove_edges(synth, safety_edges)
+
+        assert has_coop_strategy(synth, prism_handler), "After safety assumptions, game is unwinnable no matter what"
+        print("Fairness necessary:", not has_winning_strategy(synth, prism_handler))
         fairness_edges = minimal_fairness_edges(synth, prism_handler)
-        assert fairness_edges is not None, "game unwinnable after safety assumptions"
-
-        print("SAFETY ASSUM", safety_edges)
-        print("FAIRNESS ASSUM", fairness_edges)
-
+        print("FAIRNESS ASSUM", *fairness_edges, sep="\n")
         safe_and_fair_game = construct_fair_game(synth, fairness_edges)
+
+        assert has_coop_strategy(safe_and_fair_game, prism_handler), "After fairness assumptions, game is unwinnable " \
+                                                                     "no matter what "
+        assert has_winning_strategy(safe_and_fair_game, prism_handler), "After fairness assumptions, player 1 has no " \
+                                                                        "winning strategy "
+
         strategy = get_winning_strategy(safe_and_fair_game, prism_handler)
         controller = AdviserRobotController(orig_synth, strategy, safety_edges, fairness_edges)
 
+        # TODO: proper state to coord mapping
         ex_grid = [[0 for col in range(1)] for row in range(5)]
         viz = InteractiveViz(controller, grid=ex_grid, grid_size_x=200, grid_size_y=1000)
-        viz.init_human_pos(0, 0)
+        viz.init_human_pos(0, 2)
         viz.init_robot_pos(0, 4)
         viz.run_loop()
 

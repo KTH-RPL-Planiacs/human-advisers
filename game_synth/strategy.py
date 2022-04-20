@@ -10,6 +10,15 @@ def has_winning_strategy(game, prism_handler):
     return result[init_id] > 0.999
 
 
+def has_coop_strategy(game, prism_handler):
+    win_prop = '<< p1,p2 >> Pmax=? [F \"accept\"]'
+    prism_model, state_ids = write_prism_model(game, "strategy")
+    prism_handler.load_model_file(prism_model)
+    result = prism_handler.check_property(win_prop)
+    init_id = state_ids[game.graph["init"]]
+    return result[init_id] > 0.999
+
+
 def get_winning_strategy(game, prism_handler, test=False):
     win_prop = '<< p1 >> Pmax=? [F \"accept\"]'
     prism_model, state_ids = write_prism_model(game, "strategy")

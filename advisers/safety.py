@@ -9,7 +9,8 @@ def minimal_safety_edges(synth, prism_handler):
     prism_handler.load_model_file(prism_model)
     result = prism_handler.check_property(win_prop)
 
-    if result[0] >= 0.999:
+    if result[state_ids[synth.graph['init']]] >= 0.999:
+        # safety not necessary
         return []
 
     safass_prop = '<< p1,p2 >> Pmax=? [F \"accept\"]'
