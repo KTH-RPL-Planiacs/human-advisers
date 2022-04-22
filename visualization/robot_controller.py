@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import copy
 
 from visualization.constants import Move
 
@@ -86,13 +87,18 @@ class AdviserRobotController(RobotController):
 
     def set_human_move(self, move):
         assert self.game.nodes[self.current_state]["player"] == 2
+        old_state = copy.deepcopy(self.current_state)
+        prob_state = self.next_prob_state(move)
         self.current_state = self.next_state(move)
+        # check safety violation
+        if (old_state, prob_state) in self.safety_adv:
+            self.safety_violated = True
 
     def set_robot_move(self, move):
         assert self.game.nodes[self.current_state]["player"] == 1
         self.current_state = self.next_state(move)
 
-    def next_state(self, move):
+    def next_prob_state(self, move):
         act = game_action_from_move(move)
         prob_state = None
         for succ in self.game.successors(self.current_state):
@@ -100,6 +106,10 @@ class AdviserRobotController(RobotController):
                 prob_state = succ
                 break
         assert prob_state is not None, "invalid move"
+        return prob_state
+
+    def next_state(self, move):
+        prob_state = self.next_prob_state(move)
         # assume moving succeeds
         for succ in self.game.successors(prob_state):
             if succ != self.current_state or move == Move.IDLE:
