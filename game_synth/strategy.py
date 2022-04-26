@@ -49,6 +49,7 @@ def get_winning_strategy(game, prism_handler, test=False):
 
 def get_min_strategy_bounded(game, prism_handler, test=False):
     win_prop = '<< p1 >> Rmin=? [F \"accept\"]'
+    # TODO: actual bounds
     step_bound = 20
     # TODO: actual costs
     costs = {game.graph["init"]: 5}
@@ -77,4 +78,9 @@ def get_min_strategy_bounded(game, prism_handler, test=False):
         if state_id in id_strat.keys():
             strategy[state] = id_strat[state_id]
 
+    for state, moves in strategy.items():
+        if len(moves) > 1:
+            moves.remove("stay")
+        assert len(moves) == 1
+        strategy[state] = list(moves)[0]
     return strategy

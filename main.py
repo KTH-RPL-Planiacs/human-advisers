@@ -6,8 +6,8 @@ from models.corridor import corridor_mdp, det_corridor_mdp
 from ltlf2dfa_nx.mona2nx import to_nxgraph
 from ltlf2dfa_nx.parse_ltlf import to_mona
 from game_synth.modelled_human_game import create_game
-from game_synth.helpers import remove_edges
-from game_synth.strategy import has_winning_strategy, get_winning_strategy, has_coop_strategy
+from game_synth.helpers import remove_edges, remove_other_edges
+from game_synth.strategy import has_winning_strategy, get_winning_strategy, has_coop_strategy, get_min_strategy_bounded
 from advisers.safety import minimal_safety_edges
 from advisers.fairness import minimal_fairness_edges, construct_fair_game
 from visualization.interactive_viz import InteractiveViz
@@ -18,7 +18,7 @@ if __name__ == "__main__":
         prism_handler = PrismBridge()
         print("Successfully connected to PRISM java gateway!")
 
-        robot_model = corridor_mdp("_r", "end_bot")
+        robot_model = det_corridor_mdp("_r", "end_bot")
         human_model = det_corridor_mdp("_h", "crit")
         spec = "F(end_top_r) && G(!(crit_r && crit_h))"
         dfa = to_nxgraph(to_mona(spec))
@@ -44,7 +44,11 @@ if __name__ == "__main__":
                                                                         "winning strategy "
 
         strategy = get_winning_strategy(safe_and_fair_game, prism_handler)
-        controller = AdviserRobotController(orig_synth, strategy, safety_edges, fairness_edges)
+
+        remove_other_edges(synth, fairness_edges)
+        minimal_strategy = get_min_strategy_bounded(synth, prism_handler)
+        print(minimal_strategy)
+        controller = AdviserRobotController(orig_synth, minimal_strategy, safety_edges, fairness_edges)
 
         # TODO: proper state to coord mapping
         ex_grid = [[0 for col in range(1)] for row in range(5)]

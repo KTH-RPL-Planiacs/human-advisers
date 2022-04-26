@@ -84,13 +84,18 @@ def remove_other_edges(game, edges):
     if not edges:
         return
 
+    edges_to_remove = []
+
     for edge in edges:
         node_from = edge[0]
         node_to = edge[1]
         for succ in game.successors(node_from):
             hyp_edge = (node_from, succ)
             if hyp_edge not in edges:
-                game.remove_edge(hyp_edge)
+                edges_to_remove.append(hyp_edge)
+
+    for edge in edges_to_remove:
+        game.remove_edge(edge[0], edge[1])
 
 
 def reduce_set_of_guards(sog):
