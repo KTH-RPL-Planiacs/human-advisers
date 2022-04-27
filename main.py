@@ -48,11 +48,17 @@ if __name__ == "__main__":
         minimal_strategy = get_min_strategy_bounded(synth, prism_handler, safety=safety_edges, fairness=fairness_edges)
         controller = AdviserRobotController(orig_synth, minimal_strategy, safety_edges, fairness_edges)
 
-        # TODO: proper state to coord mapping
+        # state to coord mapping
+        corridor_mdp_coords = {
+            'end_top': (0, 0),
+            'corridor_top': (0, 1),
+            'crit': (0, 2),
+            'corridor_bot': (0, 3),
+            'end_bot': (0, 4),
+        }
+
         ex_grid = [[0 for col in range(1)] for row in range(5)]
-        viz = InteractiveViz(controller, grid=ex_grid, grid_size_x=200, grid_size_y=1000)
-        viz.init_human_pos(0, 2)
-        viz.init_robot_pos(0, 4)
+        viz = InteractiveViz(controller, grid=ex_grid, state_coord_map=corridor_mdp_coords, grid_size_x=200, grid_size_y=1000)
         viz.run_loop()
 
     except Py4JNetworkError as err:

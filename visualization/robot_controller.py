@@ -87,12 +87,23 @@ class AdviserRobotController(RobotController):
 
     def set_human_move(self, move):
         assert self.game.nodes[self.current_state]["player"] == 2
+        valid_moves = self.valid_moves()
+        assert "stay" in valid_moves
+        if game_action_from_move(move) not in valid_moves:
+            move = Move.IDLE
         old_state = copy.deepcopy(self.current_state)
         prob_state = self.next_prob_state(move)
         self.current_state = self.next_state(move)
         # check safety violation
         if (old_state, prob_state) in self.safety_adv:
             self.safety_violated = True
+
+    def valid_moves(self):
+        assert self.game.nodes[self.current_state]["player"] != 0
+        moves = set()
+        for succ in self.game.successors(self.current_state):
+            moves.add(self.game.edges[self.current_state, succ]["act"])
+        return moves
 
     def set_robot_move(self, move):
         assert self.game.nodes[self.current_state]["player"] == 1
@@ -140,6 +151,12 @@ class AdviserRobotController(RobotController):
             if (next_state, succ) in self.fairness_adv:
                 adv.add(move_from_game_action(self.game.edges[next_state, succ]["act"]))
         return adv
+
+    def current_robot_state(self):
+        return self.current_state[0]
+
+    def current_human_state(self):
+        return self.current_state[1]
 
 
 def game_action_from_move(move):

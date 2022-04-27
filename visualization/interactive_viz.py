@@ -19,8 +19,9 @@ class RectSprite(pygame.sprite.Sprite):
 
 class InteractiveViz:
 
-    def __init__(self, robot_controller, grid, grid_size_x=500, grid_size_y=500, cell_margin=5):
+    def __init__(self, robot_controller, grid, state_coord_map, grid_size_x=500, grid_size_y=500, cell_margin=5):
         self.robot_controller = robot_controller
+        self.state_coord_map = state_coord_map
 
         # cell dimensions
         self.GRID_SIZE = (grid_size_x, grid_size_y)
@@ -34,6 +35,7 @@ class InteractiveViz:
         self.next_robot_pos = (0, 0)
         self.human_pos = (0, 0)
         self.next_human_pos = (0, 0)
+        self.init_states()
 
         # simulation speed
         self.FPS = 60  # frames per second
@@ -92,6 +94,21 @@ class InteractiveViz:
         self.running = True
         self.paused = False
 
+    def init_states(self):
+        cur_state = self.robot_controller.current_state
+
+        # robot
+        robot_state = cur_state[0]
+        x, y = self.state_coord_map[robot_state]
+        self.robot_pos = (x, y)
+        self.next_robot_pos = (x, y)
+
+        # human
+        human_state = cur_state[1]
+        x, y = self.state_coord_map[human_state]
+        self.human_pos = (x, y)
+        self.next_human_pos = (x, y)
+
     def init_arrow_positions(self, arrows):
         x_panel_center = self.GRID_SIZE[0] + self.PANEL_WIDTH / 2.
         y_start = 100. + self.ARROW_SIZE / 2.
@@ -100,14 +117,6 @@ class InteractiveViz:
         arrows[Move.LEFT].rect.center = (x_panel_center - self.ARROW_SIZE, y_start + self.ARROW_SIZE)
         arrows[Move.RIGHT].rect.center = (x_panel_center + self.ARROW_SIZE, y_start + self.ARROW_SIZE)
         arrows[Move.DOWN].rect.center = (x_panel_center, y_start + 2. * self.ARROW_SIZE)
-
-    def init_human_pos(self, x, y):
-        self.human_pos = (x, y)
-        self.next_human_pos = (x, y)
-
-    def init_robot_pos(self, x, y):
-        self.robot_pos = (x, y)
-        self.next_robot_pos = (x, y)
 
     def render(self):
         self.screen.fill(Color.BLACK)
@@ -207,43 +216,21 @@ class InteractiveViz:
             self.step()
 
     def step(self):
-        # new human position
+        # change current position
         self.human_pos = tuple(self.next_human_pos)
-        nx = self.human_pos[0]
-        ny = self.human_pos[1]
-
-        human_move = self.get_human_move()
-        if human_move == Move.UP:
-            ny -= 1
-        if human_move == Move.DOWN:
-            ny += 1
-        if human_move == Move.LEFT:
-            nx -= 1
-        if human_move == Move.RIGHT:
-            nx += 1
-
-        self.next_human_pos = (nx, ny)
-
-        # new robot position
         self.robot_pos = tuple(self.next_robot_pos)
-        nx = self.robot_pos[0]
-        ny = self.robot_pos[1]
 
+        # get next move
+        human_move = self.get_human_move()
         robot_move = self.robot_controller.get_next_move()
-        if robot_move == Move.UP:
-            ny -= 1
-        if robot_move == Move.DOWN:
-            ny += 1
-        if robot_move == Move.LEFT:
-            nx -= 1
-        if robot_move == Move.RIGHT:
-            nx += 1
-
-        self.next_robot_pos = (nx, ny)
 
         # update robot controller
         self.robot_controller.set_robot_move(robot_move)
         self.robot_controller.set_human_move(human_move)
+
+        # update next position
+        self.next_robot_pos = self.state_coord_map[self.robot_controller.current_robot_state()]
+        self.next_human_pos = self.state_coord_map[self.robot_controller.current_human_state()]
 
     def get_human_move(self):
         human_move = Move.IDLE

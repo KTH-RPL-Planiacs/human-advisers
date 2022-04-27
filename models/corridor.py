@@ -162,3 +162,4 @@ def det_corridor_mdp(r_id, init_state):
 
     is_valid(m)
     return m
+
