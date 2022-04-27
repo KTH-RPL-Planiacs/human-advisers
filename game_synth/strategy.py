@@ -47,12 +47,28 @@ def get_winning_strategy(game, prism_handler, test=False):
     return strategy
 
 
-def get_min_strategy_bounded(game, prism_handler, test=False):
+def get_min_strategy_bounded(game, prism_handler, safety=None, fairness=None, test=False):
+    if safety is None:
+        safety = []
+    if fairness is None:
+        fairness = []
     win_prop = '<< p1 >> Rmin=? [F \"accept\"]'
-    # TODO: actual bounds
-    step_bound = 20
-    # TODO: actual costs
-    costs = {game.graph["init"]: 5}
+    # TODO: better bounds?
+    step_bound = game.number_of_nodes()
+    # costs
+    costs = {}
+    for edge in safety:
+        node_from = edge[0]
+        if node_from not in costs.keys():
+            costs[node_from] = 0
+        costs[node_from] += 1
+    for edge in fairness:
+        node_from = edge[0]
+        if node_from not in costs.keys():
+            costs[node_from] = 0
+        costs[node_from] += 1
+
+    # prism translations
     prism_model, state_ids = write_prism_model_bounded(game, step_bound, costs, "min_bounded")
     prism_handler.load_model_file(prism_model)
     prism_strat = prism_handler.synthesize_strategy(win_prop, test)

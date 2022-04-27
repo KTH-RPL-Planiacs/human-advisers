@@ -43,11 +43,9 @@ if __name__ == "__main__":
         assert has_winning_strategy(safe_and_fair_game, prism_handler), "After fairness assumptions, player 1 has no " \
                                                                         "winning strategy "
 
-        strategy = get_winning_strategy(safe_and_fair_game, prism_handler)
-
         remove_other_edges(synth, fairness_edges)
-        minimal_strategy = get_min_strategy_bounded(synth, prism_handler)
-        print(minimal_strategy)
+        # strategy = get_winning_strategy(safe_and_fair_game, prism_handler)
+        minimal_strategy = get_min_strategy_bounded(synth, prism_handler, safety=safety_edges, fairness=fairness_edges)
         controller = AdviserRobotController(orig_synth, minimal_strategy, safety_edges, fairness_edges)
 
         # TODO: proper state to coord mapping
