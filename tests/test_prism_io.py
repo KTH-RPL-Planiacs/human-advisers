@@ -22,6 +22,7 @@ class PrismIOTest(unittest.TestCase):
         self.test_game.add_edge('C_p', 'A', prob=0.5)
         self.test_game.add_edge('C_p', 'C_pp', prob=0.5)
         self.test_game.add_edge('C_pp', 'B', prob=1)
+        os.mkdir(os.path.join(os.getcwd(), 'generated'))
 
     def test_write_prism_model(self):
         file_name, state_ids = write_prism_model(self.test_game, 'test')

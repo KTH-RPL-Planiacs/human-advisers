@@ -1,6 +1,3 @@
-import networkx as nx
-
-
 def is_valid(mdp):
     is_probabilites_valid(mdp)
     return True
