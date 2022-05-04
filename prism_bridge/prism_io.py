@@ -13,8 +13,10 @@ def dfs(graph, node, prob, reach_dict, path=''):
 
 
 def write_prism_model(synth, name=''):
-    cwd = os.getcwd()
-    file_name = cwd + "/generated/%s.prism" % name
+    path = os.path.join(os.getcwd(), 'generated')
+    if not os.path.isdir(path):
+        os.mkdir(path)
+    file_name = path + "/%s.prism" % name
     p1_actions = []
     p2_actions = []
     transitions = ''
