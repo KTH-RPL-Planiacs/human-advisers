@@ -10,7 +10,7 @@ I recommend building from source, please check the respective websites for build
 ### [Py4J](https://www.py4j.org/)
 Py4J is used to create a java gateway in order to access the PRISM java API from python. 
 ```
-pip3 install py4j
+pip install py4j
 ```
 
 ## Usage
@@ -20,8 +20,8 @@ and the PRISM-games .class files and .jars either by extending the CLASSPATH or 
 ### Extending the Class Path
 While I recommend using ```javac -cp...``` to link necessary .class and .jar files, you can of course also extend 
 the class path permanently. You will find the PRISM files in your PRISM directory.
-The Py4J jar might be in different places, but it usually should be in ```/usr/local/share/``` after installation. 
-Make sure the version number is correct.
+The Py4J jar might be in different places, but it usually should be in ```/usr/local/share/``` or 
+in your virtual environment folder after installation. Make sure the version number is correct.
 ```
 export PRISM_HOME="/your/path/to/prism/prism"
 export CLASSPATH="${CLASSPATH}:${PRISM_HOME}/classes"
