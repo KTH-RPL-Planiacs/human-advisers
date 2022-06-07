@@ -44,6 +44,50 @@ def construct_fair_game(synth, fairness_edges):
     return fairness_synth
 
 
+def union_minimal_fairness_egdes(synth, prism_handler):
+    # check if fairness is necessary
+    win_prop = '<< p1 >> Pmax=? [F \"accept\"]'
+    # PRISM translations
+    prism_model, state_ids = write_prism_model(synth, "fairness")
+    prism_handler.load_model_file(prism_model)
+    result = prism_handler.check_property(win_prop)
+
+    winnable = result[state_ids[synth.graph['init']]] >= 0.999
+    if winnable:
+        # fairness is not necessary
+        return []
+
+    # fairness is necessary
+    # start by assuming (almost) all player-2 edges are necessary
+    fairness_edges = []
+    for node in synth.nodes:
+        if synth.nodes[node]["player"] != 2:
+            continue
+        # remove all edges from nodes where player 2 has only a single choice (will never need fairness)
+        if len(list(synth.successors(node))) < 2:
+            continue
+        for succ in synth.successors(node):
+            fairness_edges.append((node, succ))
+
+    # check if winning the game is even possible
+    assume_fair_synth = construct_fair_game(synth, fairness_edges)
+
+    # PRISM translations
+    prism_model, state_ids = write_prism_model(assume_fair_synth, "fairness")
+    prism_handler.load_model_file(prism_model)
+    result = prism_handler.check_property(win_prop)
+
+    init_win_prob = result[state_ids[assume_fair_synth.graph['init']]]
+    assert init_win_prob >= 0.999, "no fairness edges will work"
+
+    # cache results
+    results_dict = {frozenset(fairness_edges): True, frozenset(): False}
+
+    # TODO: everything
+    print(len(fairness_edges))
+    return []
+
+
 def minimal_fairness_edges(synth, prism_handler):
     # check if fairness is necessary
     win_prop = '<< p1 >> Pmax=? [F \"accept\"]'
@@ -63,10 +107,12 @@ def minimal_fairness_edges(synth, prism_handler):
     for node in synth.nodes:
         if synth.nodes[node]["player"] != 2:
             continue
+        # remove all edges from nodes where player 2 has only a single choice (will never need fairness)
+        if len(list(synth.successors(node))) < 2:
+            continue
         for succ in synth.successors(node):
             fairness_edges.append((node, succ))
 
-    # TODO: remove all edges from nodes where player 2 has only a single choice (will never need fairness)
     assume_fair_synth = construct_fair_game(synth, fairness_edges)
 
     # PRISM translations

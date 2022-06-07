@@ -67,9 +67,18 @@ def prune_unreachable_states(game):
             game.graph['acc'].remove(urn)
 
 
-def remove_edges(game, edges):
+def remove_edges(game, edges, prune_unreachable=False):
     for edge in edges:
         game.remove_edge(*edge)
+
+    if prune_unreachable:
+        init = game.graph["init"]
+        result = nx.single_source_shortest_path_length(game, init)
+        reachable_states = set(result.keys())
+        all_states = set(game.nodes)
+        unreachable = all_states.difference(reachable_states)
+        for state in unreachable:
+            game.remove_node(state)
 
 
 def remove_other_edges(game, edges):

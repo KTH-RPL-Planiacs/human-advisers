@@ -9,7 +9,7 @@ from game_synth.modelled_human_game import create_game
 from game_synth.helpers import remove_edges, remove_other_edges
 from game_synth.strategy import has_winning_strategy, get_winning_strategy, has_coop_strategy, get_min_strategy_bounded
 from advisers.safety import minimal_safety_edges
-from advisers.fairness import minimal_fairness_edges, construct_fair_game
+from advisers.fairness import minimal_fairness_edges, construct_fair_game, union_minimal_fairness_egdes
 from visualization.interactive_viz import InteractiveViz
 from visualization.robot_controller import AdviserRobotController
 
@@ -30,12 +30,13 @@ if __name__ == "__main__":
         print("Safety necessary:", not has_winning_strategy(synth, prism_handler))
         safety_edges = minimal_safety_edges(synth, prism_handler)
         print("SAFETY ASSUM", *safety_edges, sep="\n")
-        remove_edges(synth, safety_edges)
+        remove_edges(synth, safety_edges, prune_unreachable=True)
 
         assert has_coop_strategy(synth, prism_handler), "After safety assumptions, game is unwinnable no matter what"
         print("Fairness necessary:", not has_winning_strategy(synth, prism_handler))
-        fairness_edges = minimal_fairness_edges(synth, prism_handler)
+        fairness_edges = union_minimal_fairness_egdes(synth, prism_handler)
         print("FAIRNESS ASSUM", *fairness_edges, sep="\n")
+        """
         safe_and_fair_game = construct_fair_game(synth, fairness_edges)
 
         assert has_coop_strategy(safe_and_fair_game, prism_handler), "After fairness assumptions, game is unwinnable " \
@@ -43,6 +44,7 @@ if __name__ == "__main__":
         assert has_winning_strategy(safe_and_fair_game, prism_handler), "After fairness assumptions, player 1 has no " \
                                                                         "winning strategy "
 
+        
         remove_other_edges(synth, fairness_edges)
         # strategy = get_winning_strategy(safe_and_fair_game, prism_handler)
         minimal_strategy = get_min_strategy_bounded(synth, prism_handler, safety=safety_edges, fairness=fairness_edges)
@@ -60,6 +62,7 @@ if __name__ == "__main__":
         ex_grid = [[0 for col in range(1)] for row in range(5)]
         viz = InteractiveViz(controller, grid=ex_grid, state_coord_map=corridor_mdp_coords, grid_size_x=200, grid_size_y=1000)
         viz.run_loop()
+        """
 
     except Py4JNetworkError as err:
         print('Py4JNetworkError:', err)
