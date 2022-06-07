@@ -34,9 +34,9 @@ if __name__ == "__main__":
 
         assert has_coop_strategy(synth, prism_handler), "After safety assumptions, game is unwinnable no matter what"
         print("Fairness necessary:", not has_winning_strategy(synth, prism_handler))
-        fairness_edges = union_minimal_fairness_egdes(synth, prism_handler)
+        # fairness_edges = union_minimal_fairness_egdes(synth, prism_handler)
+        fairness_edges = minimal_fairness_edges(synth, prism_handler)
         print("FAIRNESS ASSUM", *fairness_edges, sep="\n")
-        """
         safe_and_fair_game = construct_fair_game(synth, fairness_edges)
 
         assert has_coop_strategy(safe_and_fair_game, prism_handler), "After fairness assumptions, game is unwinnable " \
@@ -62,7 +62,6 @@ if __name__ == "__main__":
         ex_grid = [[0 for col in range(1)] for row in range(5)]
         viz = InteractiveViz(controller, grid=ex_grid, state_coord_map=corridor_mdp_coords, grid_size_x=200, grid_size_y=1000)
         viz.run_loop()
-        """
 
     except Py4JNetworkError as err:
         print('Py4JNetworkError:', err)

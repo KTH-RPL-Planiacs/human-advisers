@@ -1,4 +1,5 @@
 from prism_bridge.prism_io import write_prism_model
+from game_synth.helpers import powerset
 
 import copy
 import random
@@ -81,11 +82,48 @@ def union_minimal_fairness_egdes(synth, prism_handler):
     assert init_win_prob >= 0.999, "no fairness edges will work"
 
     # cache results
-    results_dict = {frozenset(fairness_edges): True, frozenset(): False}
+    results_dict = {False: [frozenset()], True: [], "smallest": len(fairness_edges)}
+    # recursively go through all options
+    recursive_fairness(synth, fairness_edges, results_dict, prism_handler)
 
-    # TODO: everything
-    print(len(fairness_edges))
     return []
+
+
+def recursive_fairness(synth, fairness_edges, results_dict, prism_handler):
+    # this result and its subsets were already worked on
+    frozen_key = frozenset(fairness_edges)
+    if frozen_key in results_dict[True]:
+        return
+
+    # check if any of the negative results is a superset of this set
+    # if so, we terminate
+    for frozen_set in results_dict[False]:
+        if frozen_set.issuperset(frozen_key):
+            return
+
+    # try if these fairness assumptions are enough
+    assume_fair_synth = construct_fair_game(synth, fairness_edges)
+    win_prop = '<< p1 >> Pmax=? [F \"accept\"]'
+    prism_model, state_ids = write_prism_model(assume_fair_synth, "fairness")
+    prism_handler.load_model_file(prism_model)
+    result = prism_handler.check_property(win_prop)
+    init_win_prob = result[state_ids[assume_fair_synth.graph['init']]]
+
+    if init_win_prob > 0.999:
+        results_dict[True].append(frozen_key)
+        if len(frozen_key) < results_dict["smallest"]:
+            results_dict["smallest"] = len(frozen_key)
+        if len(results_dict[True]) % 100 == 0:
+            print(len(results_dict[True]))
+
+        # remove all edges and try resulting sets
+        for edge in fairness_edges:
+            edges_without_edge = copy.deepcopy(fairness_edges)
+            edges_without_edge.remove(edge)
+
+            recursive_fairness(synth, edges_without_edge, results_dict, prism_handler)
+    else:
+        results_dict[False].append(frozen_key)
 
 
 def minimal_fairness_edges(synth, prism_handler):
