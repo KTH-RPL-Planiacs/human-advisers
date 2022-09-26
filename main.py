@@ -12,6 +12,7 @@ from advisers.safety import minimal_safety_edges
 from advisers.fairness import minimal_fairness_edges, construct_fair_game, union_minimal_fairness_egdes
 from visualization.interactive_viz import InteractiveViz
 from visualization.robot_controller import AdviserRobotController
+from models.io import write_game, write_strategy
 
 if __name__ == "__main__":
     try:
@@ -44,11 +45,12 @@ if __name__ == "__main__":
         assert has_winning_strategy(safe_and_fair_game, prism_handler), "After fairness assumptions, player 1 has no " \
                                                                         "winning strategy "
 
-        
         remove_other_edges(synth, fairness_edges)
-        # strategy = get_winning_strategy(safe_and_fair_game, prism_handler)
-        minimal_strategy = get_min_strategy_bounded(synth, prism_handler, safety=safety_edges, fairness=fairness_edges)
-        controller = AdviserRobotController(orig_synth, minimal_strategy, safety_edges, fairness_edges)
+        strategy = get_winning_strategy(safe_and_fair_game, prism_handler)
+        # strategy = get_min_strategy_bounded(synth, prism_handler, safety=safety_edges, fairness=fairness_edges)
+        controller = AdviserRobotController(orig_synth, strategy, safety_edges, fairness_edges)
+        write_game(orig_synth, "game.json")
+        write_strategy(strategy, safety_edges, fairness_edges, "strat.json")
 
         # state to coord mapping
         corridor_mdp_coords = {
