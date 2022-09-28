@@ -2,7 +2,7 @@ import sys
 from copy import deepcopy
 from prism_bridge.prism_bridge import PrismBridge
 from py4j.protocol import Py4JNetworkError
-from models.corridor import corridor_mdp, det_corridor_mdp
+from models.burgers import burger_robot_study, burger_human_study
 from ltlf2dfa_nx.mona2nx import to_nxgraph
 from ltlf2dfa_nx.parse_ltlf import to_mona
 from game_synth.modelled_human_game import create_game
@@ -19,9 +19,9 @@ if __name__ == "__main__":
         prism_handler = PrismBridge()
         print("Successfully connected to PRISM java gateway!")
 
-        robot_model = det_corridor_mdp("_r", "end_bot")
-        human_model = det_corridor_mdp("_h", "crit")
-        spec = "F(end_top_r) && G(!(crit_r && crit_h))"
+        robot_model = burger_robot_study()
+        human_model = burger_human_study()
+        spec = "F(delivery_r)"
         dfa = to_nxgraph(to_mona(spec))
         # we keep the original game for later
         orig_synth = create_game(robot_model, human_model, dfa)
@@ -52,6 +52,7 @@ if __name__ == "__main__":
         write_game(orig_synth, "game.json")
         write_strategy(strategy, safety_edges, fairness_edges, "strat.json")
 
+        """
         # state to coord mapping
         corridor_mdp_coords = {
             'end_top': (0, 0),
@@ -64,6 +65,7 @@ if __name__ == "__main__":
         ex_grid = [[0 for col in range(1)] for row in range(5)]
         viz = InteractiveViz(controller, grid=ex_grid, state_coord_map=corridor_mdp_coords, grid_size_x=200, grid_size_y=1000)
         viz.run_loop()
+        """
 
     except Py4JNetworkError as err:
         print('Py4JNetworkError:', err)
