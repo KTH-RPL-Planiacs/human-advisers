@@ -50,7 +50,7 @@ if __name__ == "__main__":
         # strategy = get_min_strategy_bounded(synth, prism_handler, safety=safety_edges, fairness=fairness_edges)
         controller = AdviserRobotController(orig_synth, strategy, safety_edges, fairness_edges)
         write_game(orig_synth, "game.json")
-        write_strategy(strategy, safety_edges, fairness_edges, "strat.json")
+        write_strategy(orig_synth, strategy, safety_edges, fairness_edges, "strat.json")
 
         """
         # state to coord mapping
