@@ -31,32 +31,30 @@ if __name__ == "__main__":
         synth = deepcopy(orig_synth)
         print("Product created.")
 
-        assert has_coop_strategy(synth, prism_handler), "From the start, game is unwinnable no matter what"
-        print("Safety necessary:", not has_winning_strategy(synth, prism_handler))
+        #assert has_coop_strategy(synth, prism_handler), "From the start, game is unwinnable no matter what"
+        #print("Safety necessary:", not has_winning_strategy(synth, prism_handler))
         safety_edges = minimal_safety_edges(synth, prism_handler)
         print("SAFETY ASSUM", *safety_edges, sep="\n")
         remove_edges(synth, safety_edges, prune_unreachable=True)
 
-        assert has_coop_strategy(synth, prism_handler), "After safety assumptions, game is unwinnable no matter what"
-        print("Fairness necessary:", not has_winning_strategy(synth, prism_handler))
+        #assert has_coop_strategy(synth, prism_handler), "After safety assumptions, game is unwinnable no matter what"
+        #print("Fairness necessary:", not has_winning_strategy(synth, prism_handler))
         # fairness_edges = union_minimal_fairness_egdes(synth, prism_handler)
         fairness_edges = minimal_fairness_edges(synth, prism_handler)
         print("FAIRNESS ASSUM", *fairness_edges, sep="\n")
         safe_and_fair_game = construct_fair_game(synth, fairness_edges)
 
-        assert has_coop_strategy(safe_and_fair_game, prism_handler), "After fairness assumptions, game is unwinnable " \
-                                                                     "no matter what "
-        assert has_winning_strategy(safe_and_fair_game, prism_handler), "After fairness assumptions, player 1 has no " \
-                                                                        "winning strategy "
+        #assert has_coop_strategy(safe_and_fair_game, prism_handler), "After fairness assumptions, game is unwinnable no matter what "
+        #assert has_winning_strategy(safe_and_fair_game, prism_handler), "After fairness assumptions, player 1 has no winning strategy "
 
         remove_other_edges(synth, fairness_edges)
         strategy = get_winning_strategy(safe_and_fair_game, prism_handler)
         # strategy = get_min_strategy_bounded(synth, prism_handler, safety=safety_edges, fairness=fairness_edges)
-        controller = AdviserRobotController(orig_synth, strategy, safety_edges, fairness_edges)
         write_game(orig_synth, "game.json")
         write_strategy(orig_synth, strategy, safety_edges, fairness_edges, "strat.json")
 
         """
+        controller = AdviserRobotController(orig_synth, strategy, safety_edges, fairness_edges)
         # state to coord mapping
         corridor_mdp_coords = {
             'end_top': (0, 0),
