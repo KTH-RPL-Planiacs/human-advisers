@@ -26,7 +26,7 @@ def write_strategy(game, strat, safe_edges, fair_edges, file_name):
 
     # fairness advisers
     json_dict["fair_edges"] = []
-    for e in safe_edges:
+    for e in fair_edges:
         state_from = e[0]
         action = game.edges[e]["act"]
         adv_tuple = (state_from, action)
