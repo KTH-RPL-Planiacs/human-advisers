@@ -26,7 +26,6 @@ def create_game(mdp_r, mdp_h, dfa):
     robot_ap = mdp_r.graph['ap']
     human_ap = mdp_h.graph['ap']
     joined_ap = robot_ap + human_ap
-    relevant_human_ap = list(set(human_ap).intersection(set(spec_ap)))
     synth.graph['ap_r'] = robot_ap
     synth.graph['ap_h'] = human_ap
     assert set(spec_ap).issubset(set(joined_ap))
@@ -83,25 +82,13 @@ def create_game(mdp_r, mdp_h, dfa):
                 for robot_succ in mdp_r.successors(mdp_r_from):
                     # this should be a player1 state in the robot mdp
                     assert mdp_r.nodes[robot_succ]['player'] == 1
-                    # get the resulting joined ap
-                    cur_ap = mdp_r.nodes[robot_succ]['ap'] + mdp_h.nodes[mdp_h_from]['ap']
-                    # based on new observation (cur_ap), update the dfa state
-                    for dfa_succ in dfa.successors(dfa_from):
-                        # check if config matches at least one dfa guard, skip non-matching
-                        dfa_guard = dfa.edges[dfa_from, dfa_succ]['guard']
-                        matched_guards = sog_fits_to_guard(cur_ap, dfa_guard, joined_ap, spec_ap)
-                        if len(matched_guards) == 0:
-                            continue
-
-                        # add the new state to the synthesis product and connect it
-                        synth_succ = (robot_succ, mdp_h_from, dfa_succ, 2)
-                        if not synth.has_node(synth_succ):
-                            synth.add_node(synth_succ, player=2, ap=cur_ap)
-                            que.put(synth_succ)  # put new states in queue
-                            if dfa_succ in dfa.graph['acc']:
-                                synth.graph['acc'].append(synth_succ)
-                        prob = mdp_r.edges[mdp_r_from, robot_succ]['prob']
-                        synth.add_edge(synth_from, synth_succ, prob=prob)
+                    # add the new state to the synthesis product and connect it
+                    synth_succ = (robot_succ, mdp_h_from, dfa_from, 2)
+                    if not synth.has_node(synth_succ):
+                        synth.add_node(synth_succ, player=2)
+                        que.put(synth_succ)  # put new states in queue
+                    prob = mdp_r.edges[mdp_r_from, robot_succ]['prob']
+                    synth.add_edge(synth_from, synth_succ, prob=prob)
 
             # case 2: after p2 state, resolve probabilistic event for human, also update DFA
             elif synth.nodes[pred]['player'] == 2:

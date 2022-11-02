@@ -21,11 +21,15 @@ if __name__ == "__main__":
 
         robot_model = burger_robot_study()
         human_model = burger_human_study()
-        spec = "F(delivery_r)"
+        goals = "F buns_r && F patty_r && F lettuce_r && F ketchup_r && F tomato_r"
+        constraints = "G(!(buns_r && buns_h)) && G(!(patty_r && patty_h)) && G(!(lettuce_r && lettuce_h)) && G(!(ketchup_r && ketchup_h)) & G(!(tomato_r && tomato_h))"
+        spec = goals + " && " + constraints
+        #spec = "F (buns_r && buns_h)"
         dfa = to_nxgraph(to_mona(spec))
         # we keep the original game for later
         orig_synth = create_game(robot_model, human_model, dfa)
         synth = deepcopy(orig_synth)
+        print("Product created.")
 
         assert has_coop_strategy(synth, prism_handler), "From the start, game is unwinnable no matter what"
         print("Safety necessary:", not has_winning_strategy(synth, prism_handler))
