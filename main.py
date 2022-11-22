@@ -20,8 +20,8 @@ if __name__ == "__main__":
 
         robot_model = burger_robot_study()
         human_model = burger_human_study()
-        goals = "F buns_r && F patty_r && F lettuce_r && F ketchup_r && F tomato_r"
-        constraints = "G(!(buns_r && buns_h)) && G(!(patty_r && patty_h)) && G(!(lettuce_r && lettuce_h)) && G(!(ketchup_r && ketchup_h)) & G(!(tomato_r && tomato_h))"
+        goals = "F buns_r && F patty_r && F lettuce_r && F (ketchup_r && ketchup_h) && F tomato_r"
+        constraints = "G(!(buns_r && buns_h)) && G(!(patty_r && patty_h)) && G(!(lettuce_r && lettuce_h)) && G(!(tomato_r && tomato_h))"
         spec = goals + " && " + constraints
         #spec = "F (buns_r && buns_h) && G! lettuce_h"
         dfa = to_nxgraph(to_mona(spec))
@@ -33,13 +33,13 @@ if __name__ == "__main__":
         assert has_coop_strategy(synth, prism_handler), "From the start, game is unwinnable no matter what"
         print("Safety necessary:", not has_winning_strategy(synth, prism_handler))
         safety_edges = minimal_safety_edges(synth, prism_handler)
-        print("SAFETY ASSUM", *safety_edges, sep="\n")
+        print("Minimal safety assumptions:", len(safety_edges), "edges.")
         remove_edges(synth, safety_edges, prune_unreachable=True)
 
         assert has_coop_strategy(synth, prism_handler), "After safety assumptions, game is unwinnable no matter what"
         print("Fairness necessary:", not has_winning_strategy(synth, prism_handler))
         fairness_edges = minimal_fairness_edges(synth, prism_handler)
-        print("FAIRNESS ASSUM", *fairness_edges, sep="\n")
+        print("Minimal fairness assumptions:", len(fairness_edges), "edges.")
         safe_and_fair_game = construct_fair_game(synth, fairness_edges)
 
         assert has_coop_strategy(safe_and_fair_game, prism_handler), "After fairness assumptions, game is unwinnable no matter what "
@@ -53,6 +53,7 @@ if __name__ == "__main__":
         # write results to files
         write_game(orig_synth, "game.json")
         write_strategy(orig_synth, strategy, safety_edges, fairness_edges, "strat.json")
+        print("Strategy written to file.")
 
     except Py4JNetworkError as err:
         print('Py4JNetworkError:', err)
